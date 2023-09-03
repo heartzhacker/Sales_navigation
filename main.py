@@ -47,8 +47,13 @@ def linkedin_fetch(url):
         WebDriverWait(driver, 3)
         login_btn.click()
         WebDriverWait(driver, 10)
+        time.sleep(10)
+        
+        if url.index("/company")!=-1: # fetch company's profile
+            url = url + "/about"
         driver.get(url)
-        WebDriverWait(driver, 5)
+        
+        WebDriverWait(driver, 10)
 
         last_height = driver.execute_script("return document.body.scrollHeight")
         while True:
@@ -61,9 +66,24 @@ def linkedin_fetch(url):
             last_height = new_height
     
         page_source = driver.page_source
-        soup = BeautifulSoup(page_source,'html.parser')
-        text = soup.get_text() # TODO remove multiple \n 
-        #print(text)
+        soup = BeautifulSoup(page_source,'lxml')
+
+        
+        if url.index("/company")!=-1: # fetch company's profile
+            element = soup.find("section",{"class":"org-about-module__margin-bottom"})
+            if not element:
+                return
+            text = " ".join(element.get_text().replace('\n', ' ').replace('\r', '').split())
+            res.append(text)
+            #print(text)
+        else:
+            aboutid = soup.find("div",{"id":"about"})
+            head = aboutid.find_next_sibling("div")
+            about = head.find_next_sibling("div")
+            if head:
+                text = about.get_text() # TODO remove multiple \n 
+                #print(text)
+                res.append(text)
 
 def selenium_fetch(url,depth):
     if (depth==0):
@@ -221,13 +241,16 @@ def fetch(url):
     res = []
     visited.clear()
     depth = 1
-    #recur_fetch(url,0,depth)
-    google_fetch(url)
+    recur_fetch(url,0,depth)
+    #google_fetch(url)
     for thread in thread_list:
         thread.join()
     return res
 
-print(fetch("https://www.flipkart.com/"))
+#print(fetch("https://www.flipkart.com/"))
 #print(fetch("https://www.langchain.com"))
 #print(fetch("https://www.langchain.com"))
+#fetch("https://www.linkedin.com/in/sumithbangarwa/")
 #fetch("https://www.linkedin.com/in/shaleen-badola/")
+fetch("https://www.linkedin.com/company/flipkart/")
+#fetch("https://www.linkedin.com/company/lucid-growth/")
