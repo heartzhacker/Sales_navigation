@@ -35,7 +35,7 @@ def link_relevance(base_url,new_url):
 
 def linkedin_fetch(url):
     options = webdriver.ChromeOptions()
-    #options.add_argument('--headless') 
+    options.add_argument('--headless') 
     with webdriver.Chrome(options=options) as driver:
         driver.get('https://www.linkedin.com/login?fromSignIn=true&trk=guest_homepage-basic_nav-header-signin') # linked in login
         WebDriverWait(driver, 3)
